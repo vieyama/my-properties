@@ -16,7 +16,7 @@ const MapWrapper = () => {
   const filteredProperties = filterProperties(properties, searchTerm);
 
   useEffect(() => {
-    setApiKey(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "YOUR_API_KEY");
+    setApiKey(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "");
     setIsLoading(false);
   }, []);
 
