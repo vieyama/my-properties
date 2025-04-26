@@ -4,15 +4,12 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SearchProvider } from "@/contexts/search-context"
-import Header from "@/components/header"
-import MapWrapper from "@/components/map-wrapper"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Next.js 14 with Supabase Auth",
-  description: "A Next.js 14 application with Supabase Magic Link authentication",
-  generator: 'v0.dev'
+  title: "My Property",
+  description: "A Next.js 14 application with Supabase Magic Link authentication"
 }
 
 export default function RootLayout({

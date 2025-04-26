@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin, MapMouseEvent } from '@vis.gl/react-google-maps';
 import { Search } from 'lucide-react';
 
-const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY||'';
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
 interface MapSelectorProps {
   initialLocation: { lat: number; lng: number };

@@ -40,15 +40,13 @@ const MapContainer: React.FC<MapContainerProps> = ({
           disableDefaultUI={true}
           className="w-full h-full"
           clickableIcons={false}
-          options={{
-            styles: [
-              {
-                featureType: "poi",
-                elementType: "labels",
-                stylers: [{ visibility: "off" }],
-              },
-            ],
-          }}
+          styles={[
+            {
+              featureType: "poi",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            }
+          ]}
         >
           {properties.map((property) => (
             <PropertyMarker
@@ -58,7 +56,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
               isSelected={selectedProperty?.id === property.id}
             />
           ))}
-          
+
           {selectedProperty && (
             <PropertyPopup
               property={selectedProperty}
