@@ -1,34 +1,5 @@
-export interface Property {
-  id: string;
-  price: number;
-  lat: number;
-  lng: number;
-  address: string;
-  bedrooms: number;
-  bathrooms: number;
-  sqft: number;
-  imageUrl: string;
-}
+import { Database } from "@/types/supabase";
 
-export interface PropertyDummy {
-  id: string;
-  price: number;
-  address: string;
-  imgUrl: string;
-  location: {
-    lat: number;
-    lng: number;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type Properties = Database['public']['Tables']['properties']['Row'] | null
 
-export interface PropertyFormData {
-  price: number;
-  address: string;
-  imgUrl: string;
-  location: {
-    lat: number;
-    lng: number;
-  };
-}
+export type PropertiesForm = Database['public']['Tables']['properties']['Insert']

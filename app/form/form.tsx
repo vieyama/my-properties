@@ -3,73 +3,67 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { X, Loader, MapPin } from 'lucide-react';
-import { PropertyDummy, PropertyFormData } from '@/types/property';
-import { usePropertyStore } from './store/property';
 import MapSelector from '@/components/map/map-selector';
+import { Properties, PropertiesForm } from '@/types/property';
+import { addProperties, updateProperties } from '../actions/properties';
+import { useRouter } from 'next/navigation';
 
 interface PropertyFormProps {
-  property?: PropertyDummy | null;
+  property?: Properties | null;
 }
 
 export default function PropertyForm({ property }: PropertyFormProps) {
-  const { addProperty, updateProperty } = usePropertyStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showMap, setShowMap] = useState(false);
-
+  const router = useRouter()
   const {
     register,
     handleSubmit,
     setValue,
     watch,
     formState: { errors }
-  } = useForm<PropertyFormData>({
+  } = useForm<PropertiesForm>({
     defaultValues: property ? {
       price: property.price,
       address: property.address,
-      imgUrl: property.imgUrl,
-      location: property.location,
+      image_url: property.image_url,
+      lat: property.lat,
+      lng: property.lng,
     } : {
       price: 0,
       address: '',
-      imgUrl: '',
-      location: {
-        lat: 37.7749,
-        lng: -122.4194,
-      },
+      image_url: '',
+      lat: 40.758,
+      lng: -73.982
     },
   });
 
-  const imgUrl = watch('imgUrl');
+  const image_url = watch('image_url');
 
   useEffect(() => {
     if (property) {
       setValue('price', property.price);
       setValue('address', property.address);
-      setValue('imgUrl', property.imgUrl);
-      setValue('location', property.location);
+      setValue('image_url', property.image_url);
+      setValue('lat', property.lat);
+      setValue('lng', property.lng);
     }
   }, [property, setValue]);
 
-  const onSubmit: SubmitHandler<PropertyFormData> = async (data) => {
+  const onSubmit: SubmitHandler<PropertiesForm> = async (data) => {
     setIsSubmitting(true);
-
     try {
-      if (property) {
-        updateProperty(property.id, data);
+      if (property?.id) {
+        await updateProperties({ ...data, id: property.id });
       } else {
-        addProperty(data);
+        await addProperties(data);
       }
-    } catch (error) {
-      console.error('Error saving property:', error);
-    } finally {
       setIsSubmitting(false);
+    } finally {
+      router.push('/dashboard');
     }
   };
 
-  const handleLocationSelect = (lat: number, lng: number) => {
-    setValue('location', { lat, lng });
-    setShowMap(false);
-  };
 
   return (
     <div className="container mx-auto">
@@ -87,25 +81,25 @@ export default function PropertyForm({ property }: PropertyFormProps) {
             </label>
             <input
               type="text"
-              {...register('imgUrl', {
+              {...register('image_url', {
                 required: 'Image URL is required',
-                pattern: {
-                  value: /^(https?:\/\/)?.+\.(jpeg|jpg|png|webp|avif)(\?.*)?$/i,
-                  message: 'Must be a valid image URL'
-                }
+                // pattern: {
+                //   value: /^(https?:\/\/)?.+\.(jpeg|jpg|png|webp|avif)(\?.*)?$/i,
+                //   message: 'Must be a valid image URL'
+                // }
               })}
               placeholder="https://example.com/image.jpg"
-              className={`w-full px-3 py-2 border rounded-md ${errors.imgUrl ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-3 py-2 border rounded-md ${errors.image_url ? 'border-red-500' : 'border-gray-300'
                 } focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
-            {errors.imgUrl && (
-              <p className="mt-1 text-sm text-red-500">{errors.imgUrl.message}</p>
+            {errors.image_url && (
+              <p className="mt-1 text-sm text-red-500">{errors.image_url.message}</p>
             )}
 
-            {imgUrl && (
+            {image_url && (
               <div className="mt-3 relative h-40 rounded-md overflow-hidden">
                 <img
-                  src={imgUrl}
+                  src={image_url}
                   alt="Property preview"
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -179,8 +173,8 @@ export default function PropertyForm({ property }: PropertyFormProps) {
                   </div>
                   <div className="h-[500px]">
                     <MapSelector
-                      initialLocation={watch('location')}
-                      onLocationSelect={handleLocationSelect}
+                      initialLocation={{ lat: watch('lat'), lng: watch('lng') }}
+                      setValue={setValue}
                     />
                   </div>
                 </div>
@@ -194,7 +188,7 @@ export default function PropertyForm({ property }: PropertyFormProps) {
                 </label>
                 <input
                   type="text"
-                  value={watch('location').lat.toFixed(6)}
+                  value={watch('lat').toFixed(6)}
                   readOnly
                   className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
                 />
@@ -205,7 +199,7 @@ export default function PropertyForm({ property }: PropertyFormProps) {
                 </label>
                 <input
                   type="text"
-                  value={watch('location').lng.toFixed(6)}
+                  value={watch('lng').toFixed(6)}
                   readOnly
                   className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
                 />

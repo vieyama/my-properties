@@ -1,4 +1,4 @@
-import { Property } from "@/types/property";
+import { Properties } from "@/types/property";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -16,15 +16,12 @@ export function formatPrice(price: number): string {
   }).format(price);
 }
 
-export function filterProperties(properties: Property[], searchTerm: string): Property[] {
+export function filterProperties(properties: Properties[], searchTerm: string): Properties[] {
   const search = searchTerm.toLowerCase().trim();
   if (!search) return properties;
 
   return properties.filter(property =>
-    property.address.toLowerCase().includes(search) ||
-    property.price.toString().includes(search) ||
-    `${property.bedrooms} bed`.includes(search) ||
-    `${property.bathrooms} bath`.includes(search) ||
-    `${property.sqft} sqft`.includes(search)
+    property?.address.toLowerCase().includes(search) ||
+    property?.price.toString().includes(search)
   );
 }

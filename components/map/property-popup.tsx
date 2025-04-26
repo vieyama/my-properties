@@ -1,41 +1,71 @@
 "use client";
 
 import React from "react";
-import { AdvancedMarker, InfoWindow } from "@vis.gl/react-google-maps";
-import { Property } from "@/types/property";
+import { InfoWindow } from "@vis.gl/react-google-maps";
 import { formatPrice } from "@/lib/utils";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { XIcon, Bed, Bath, Home } from "lucide-react";
+import { Edit3Icon, Trash2Icon, XIcon } from "lucide-react";
+import { Properties } from "@/types/property";
+import { useRouter } from "next/navigation";
+import { deleteProperties } from "@/app/actions/properties";
 
 interface PropertyPopupProps {
-  property: Property;
+  property: Properties;
   onClose: () => void;
 }
 
 const PropertyPopup: React.FC<PropertyPopupProps> = ({ property, onClose }) => {
+  const router = useRouter()
+
+  const onEdit = () => {
+    router.push(`/form/${property?.id}`)
+  }
+
+  const onDelete = async () => {
+    await deleteProperties(property?.id ?? 0)
+    onClose()
+    router.refresh()
+  }
+
   return (
     <InfoWindow
-      position={{ lat: property.lat, lng: property.lng }}
+      position={{ lat: property?.lat ?? 0, lng: property?.lng ?? 0 }}
       headerDisabled
       className="!overflow-hidden"
     >
       <img
-        src={property.imageUrl}
-        alt={property.address}
+        src={property?.image_url}
         className="w-full h-full rounded-lg object-cover transition-transform duration-500 hover:scale-105"
       />
-      <Button
-        size="icon"
-        variant="secondary"
-        className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90"
-        onClick={onClose}
-      >
-        <XIcon className="h-4 w-4" />
-      </Button>
+      <div className="absolute top-2 right-2 flex items-center gap-2">
+        <Button
+          size="icon"
+          variant="secondary"
+          className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90"
+          onClick={onEdit}
+        >
+          <Edit3Icon className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="secondary"
+          className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90"
+          onClick={onDelete}
+        >
+          <Trash2Icon className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="secondary"
+          className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90"
+          onClick={onClose}
+        >
+          <XIcon className="h-4 w-4" />
+        </Button>
+      </div>
       <div className="relative text-center bottom-4 left-0 right-0">
         <span className="text-lg font-bold rounded-3xl bg-white px-5 py-3">
-          {formatPrice(property.price)}
+          {formatPrice(property?.price ?? 0)}
         </span>
       </div>
     </InfoWindow>

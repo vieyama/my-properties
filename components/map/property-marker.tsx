@@ -2,12 +2,12 @@
 
 import React from "react";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
-import { Property } from "@/types/property";
 import { formatPrice } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { Properties } from "@/types/property";
 
 interface PropertyMarkerProps {
-  property: Property;
+  property: Properties;
   onClick: () => void;
   isSelected: boolean;
 }
@@ -17,11 +17,11 @@ const PropertyMarker: React.FC<PropertyMarkerProps> = ({
   onClick,
   isSelected,
 }) => {
-  const formattedPrice = formatPrice(property.price);
+  const formattedPrice = formatPrice(property?.price ?? 0);
 
   return (
     <AdvancedMarker
-      position={{ lat: property.lat, lng: property.lng }}
+      position={{ lat: property?.lat ?? 0, lng: property?.lng ?? 0 }}
       onClick={onClick}
     >
       <div className="relative">
@@ -29,8 +29,8 @@ const PropertyMarker: React.FC<PropertyMarkerProps> = ({
           className={`
             relative z-10 rounded-full px-3 py-1 text-sm font-medium text-white shadow-md
             transition-all duration-200 hover:scale-105
-            ${isSelected 
-              ? "bg-primary scale-110" 
+            ${isSelected
+              ? "bg-primary scale-110"
               : "bg-black"}
           `}
         >

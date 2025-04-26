@@ -4,11 +4,11 @@ import React, { useState } from "react";
 import { APIProvider, Map } from "@vis.gl/react-google-maps";
 import PropertyMarker from "./property-marker";
 import PropertyPopup from "./property-popup";
-import { Property } from "@/types/property";
+import { Properties } from "@/types/property";
 
 interface MapContainerProps {
   apiKey: string;
-  properties: Property[];
+  properties: Properties[];
   initialCenter?: { lat: number; lng: number };
   initialZoom?: number;
 }
@@ -17,11 +17,11 @@ const MapContainer: React.FC<MapContainerProps> = ({
   apiKey,
   properties,
   initialCenter = { lat: 40.758, lng: -73.982 },
-  initialZoom = 16,
+  initialZoom = 10,
 }) => {
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<Properties | null>(null);
 
-  const handleMarkerClick = (property: Property) => {
+  const handleMarkerClick = (property: Properties) => {
     setSelectedProperty(property);
   };
 
@@ -48,12 +48,12 @@ const MapContainer: React.FC<MapContainerProps> = ({
             }
           ]}
         >
-          {properties.map((property) => (
+          {properties?.map((property) => (
             <PropertyMarker
-              key={property.id}
+              key={property?.id}
               property={property}
               onClick={() => handleMarkerClick(property)}
-              isSelected={selectedProperty?.id === property.id}
+              isSelected={selectedProperty?.id === property?.id}
             />
           ))}
 
