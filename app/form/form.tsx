@@ -1,12 +1,16 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { X, Loader, MapPin } from 'lucide-react';
+import { X, Loader, MapPin, ImageUpIcon } from 'lucide-react';
 import MapSelector from '@/components/map/map-selector';
 import { Properties, PropertiesForm } from '@/types/property';
-import { addProperties, updateProperties } from '../actions/properties';
+import { addProperties, updateProperties, uploadImage } from '../actions/properties';
 import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import Link from 'next/link';
 
 interface PropertyFormProps {
   property?: Properties | null;
@@ -15,6 +19,8 @@ interface PropertyFormProps {
 export default function PropertyForm({ property }: PropertyFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [file, setFile] = useState<File | null>(null)
   const router = useRouter()
   const {
     register,
@@ -50,6 +56,23 @@ export default function PropertyForm({ property }: PropertyFormProps) {
     }
   }, [property, setValue]);
 
+  const handleChangeFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      setFile(files[0])
+    }
+  }
+
+  const handleUpload = async () => {
+    setIsUploading(true)
+    try {
+      const imageUrl = await uploadImage(file as File)
+      setValue('image_url', imageUrl);
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
   const onSubmit: SubmitHandler<PropertiesForm> = async (data) => {
     setIsSubmitting(true);
     try {
@@ -58,6 +81,7 @@ export default function PropertyForm({ property }: PropertyFormProps) {
       } else {
         await addProperties(data);
       }
+      setFile(null)
       setIsSubmitting(false);
     } finally {
       router.push('/dashboard');
@@ -66,8 +90,8 @@ export default function PropertyForm({ property }: PropertyFormProps) {
 
 
   return (
-    <div className="container mx-auto">
-      <div className="flex justify-between items-center p-6 border-b">
+    <div className="container max-w-xl mx-auto">
+      <div className="flex justify-between items-center p-6 border-b mt-10">
         <h2 className="text-xl font-semibold text-gray-900">
           {property ? 'Edit Property' : 'Add New Property'}
         </h2>
@@ -79,22 +103,37 @@ export default function PropertyForm({ property }: PropertyFormProps) {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Property Image
             </label>
-            <input
-              type="text"
-              {...register('image_url', {
-                required: 'Image URL is required',
-                // pattern: {
-                //   value: /^(https?:\/\/)?.+\.(jpeg|jpg|png|webp|avif)(\?.*)?$/i,
-                //   message: 'Must be a valid image URL'
-                // }
-              })}
-              placeholder="https://example.com/image.jpg"
-              className={`w-full px-3 py-2 border rounded-md ${errors.image_url ? 'border-red-500' : 'border-gray-300'
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            />
-            {errors.image_url && (
-              <p className="mt-1 text-sm text-red-500">{errors.image_url.message}</p>
-            )}
+            <div>
+              <div className="flex items-center gap-3">
+                <Input id="picture" type="file" onChange={handleChangeFile} />
+                <Button type='button' onClick={handleUpload} disabled={!file}>
+                  {isUploading ? <Loader className="w-4 h-4 animate-spin" /> : <ImageUpIcon />}
+                  {isUploading ? 'Uploading...' : "Upload"}
+                </Button>
+              </div>
+              <div className="relative text-center py-4 text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+                <span className="relative z-10 bg-background px-2 text-muted-foreground">
+                  Or paste the image link
+                </span>
+              </div>
+              <input
+                disabled={isUploading}
+                type="text"
+                {...register('image_url', {
+                  required: 'Image URL is required',
+                  pattern: {
+                    value: /^(https?:\/\/)?.+\.(jpeg|jpg|png|webp|avif)(\?.*)?$/i,
+                    message: 'Must be a valid image URL'
+                  }
+                })}
+                placeholder="https://example.com/image.jpg"
+                className={`w-full px-3 py-2 border rounded-md ${errors.image_url ? 'border-red-500' : 'border-gray-300'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+              {errors.image_url && (
+                <p className="mt-1 text-sm text-red-500">{errors.image_url.message}</p>
+              )}
+            </div>
 
             {image_url && (
               <div className="mt-3 relative h-40 rounded-md overflow-hidden">
@@ -209,20 +248,22 @@ export default function PropertyForm({ property }: PropertyFormProps) {
         </div>
 
         <div className="mt-8 flex justify-end gap-3">
-          <button
+          <Button
             type="button"
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+            variant="outline"
+            asChild
           >
-            Cancel
-          </button>
-          <button
+            <Link href="/dashboard">
+              Cancel
+            </Link>
+          </Button>
+          <Button
             type="submit"
-            disabled={isSubmitting}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:opacity-70 flex items-center gap-2"
+            disabled={isSubmitting || isUploading}
           >
             {isSubmitting && <Loader className="w-4 h-4 animate-spin" />}
             {property ? 'Update Property' : 'Add Property'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

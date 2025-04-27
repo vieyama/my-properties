@@ -31,11 +31,10 @@ const PropertyPopup: React.FC<PropertyPopupProps> = ({ property, onClose }) => {
     <InfoWindow
       position={{ lat: property?.lat ?? 0, lng: property?.lng ?? 0 }}
       headerDisabled
-      className="!overflow-hidden"
     >
       <img
         src={property?.image_url}
-        className="w-full h-full rounded-lg object-cover transition-transform duration-500 hover:scale-105"
+        className="w-full h-full rounded-xl object-cover transition-transform duration-500"
       />
       <div className="absolute top-2 right-2 flex items-center gap-2">
         <Button
@@ -63,8 +62,11 @@ const PropertyPopup: React.FC<PropertyPopupProps> = ({ property, onClose }) => {
           <XIcon className="h-4 w-4" />
         </Button>
       </div>
-      <div className="relative text-center bottom-4 left-0 right-0">
-        <span className="text-lg font-bold rounded-3xl bg-white px-5 py-3">
+      <div className="absolute bottom-7 rounded-b-lg bg-slate-950/25 backdrop-blur-sm h-14 flex justify-center items-center w-full text-center">
+        <span className="mb-3 text-lg text-white font-normal max-w-[15rem] truncate">{property?.address}</span>
+      </div>
+      <div className="relative text-center bottom-4 left-0 right-0 rounded-b-lg">
+        <span className="text-lg font-bold rounded-3xl bg-white px-5 py-1.5">
           {formatPrice(property?.price ?? 0)}
         </span>
       </div>
