@@ -1,16 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import MapContainer from "@/components/map/map-container";
 import { useSearch } from "@/contexts/search-context";
-import { filterProperties } from "@/lib/utils";
-import { Properties } from "@/types/property";
+import { useProperties } from "@/hooks/useProperties";
+import { useDebounce } from "use-debounce";
 
-const MapWrapper = ({ properties }: { properties: Properties[] }) => {
+const MapWrapper = () => {
   const { searchTerm } = useSearch();
-  const [isLoading] = useState(false)
-
-  const filteredProperties = filterProperties(properties, searchTerm);
+  const [debouncedSearch] = useDebounce(searchTerm, 500);
+  const { items, isLoading } = useProperties({ search: debouncedSearch })
 
   if (isLoading) {
     return (
@@ -25,7 +23,7 @@ const MapWrapper = ({ properties }: { properties: Properties[] }) => {
 
   return (
     <div className="h-[calc(100vh-4rem)]">
-      <MapContainer apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""} properties={filteredProperties} />
+      <MapContainer apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""} properties={items} />
     </div>
   );
 };

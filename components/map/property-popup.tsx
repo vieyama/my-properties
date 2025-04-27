@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Edit3Icon, Trash2Icon, XIcon } from "lucide-react";
 import { Properties } from "@/types/property";
 import { useRouter } from "next/navigation";
-import { deleteProperties } from "@/app/actions/properties";
+import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
+import { useProperties } from "@/hooks/useProperties";
+import { deleteProperties } from "@/lib/api";
 
 interface PropertyPopupProps {
   property: Properties;
@@ -16,13 +19,15 @@ interface PropertyPopupProps {
 
 const PropertyPopup: React.FC<PropertyPopupProps> = ({ property, onClose }) => {
   const router = useRouter()
+  const { items, isLoading, isError, mutate } = useProperties();
 
   const onEdit = () => {
     router.push(`/form/${property?.id}`)
   }
 
   const onDelete = async () => {
-    await deleteProperties(property?.id ?? 0)
+    await deleteProperties(property?.id ?? 0);
+    mutate();
     onClose()
     router.refresh()
   }
