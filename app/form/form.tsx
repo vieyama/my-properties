@@ -5,18 +5,20 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { X, Loader, MapPin, ImageUpIcon } from 'lucide-react';
 import MapSelector from '@/components/map/map-selector';
 import { Properties, PropertiesForm } from '@/types/property';
-import { addProperties, updateProperties, uploadImage } from '../actions/properties';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
+import { createProperties, updateProperties, uploadProperties } from '@/lib/api';
+import { useProperties } from '@/hooks/useProperties';
 
 interface PropertyFormProps {
   property?: Properties | null;
 }
 
 export default function PropertyForm({ property }: PropertyFormProps) {
+  const { mutate } = useProperties();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -66,8 +68,11 @@ export default function PropertyForm({ property }: PropertyFormProps) {
   const handleUpload = async () => {
     setIsUploading(true)
     try {
-      const imageUrl = await uploadImage(file as File)
-      setValue('image_url', imageUrl);
+      const formData = new FormData();
+      formData.append('file', file as File);
+
+      const result = await uploadProperties(formData)
+      setValue('image_url', result.data.url);
     } finally {
       setIsUploading(false)
     }
@@ -77,12 +82,13 @@ export default function PropertyForm({ property }: PropertyFormProps) {
     setIsSubmitting(true);
     try {
       if (property?.id) {
-        await updateProperties({ ...data, id: property.id });
+        await updateProperties(property.id, data);
       } else {
-        await addProperties(data);
+        await createProperties(data);
       }
       setFile(null)
       setIsSubmitting(false);
+      mutate();
     } finally {
       router.push('/dashboard');
     }
@@ -100,9 +106,9 @@ export default function PropertyForm({ property }: PropertyFormProps) {
       <form onSubmit={handleSubmit(onSubmit)} className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <Label>
               Property Image
-            </label>
+            </Label>
             <div>
               <div className="flex items-center gap-3">
                 <Input id="picture" type="file" onChange={handleChangeFile} />
@@ -150,9 +156,9 @@ export default function PropertyForm({ property }: PropertyFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <Label className="block text-sm font-medium text-gray-700 mb-1">
               Price ($)
-            </label>
+            </Label>
             <input
               type="number"
               {...register('price', {
@@ -169,9 +175,9 @@ export default function PropertyForm({ property }: PropertyFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <Label className="block text-sm font-medium text-gray-700 mb-1">
               Address
-            </label>
+            </Label>
             <input
               type="text"
               {...register('address', { required: 'Address is required' })}
@@ -185,9 +191,9 @@ export default function PropertyForm({ property }: PropertyFormProps) {
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <Label className="block text-sm font-medium text-gray-700 mb-1">
               Location
-            </label>
+            </Label>
             <button
               type="button"
               onClick={() => setShowMap(true)}
@@ -222,9 +228,9 @@ export default function PropertyForm({ property }: PropertyFormProps) {
 
             <div className="mt-2 grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <Label className="block text-xs font-medium text-gray-500 mb-1">
                   Latitude
-                </label>
+                </Label>
                 <input
                   type="text"
                   value={watch('lat').toFixed(6)}
@@ -233,9 +239,9 @@ export default function PropertyForm({ property }: PropertyFormProps) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <Label className="block text-xs font-medium text-gray-500 mb-1">
                   Longitude
-                </label>
+                </Label>
                 <input
                   type="text"
                   value={watch('lng').toFixed(6)}
