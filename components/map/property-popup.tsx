@@ -11,6 +11,7 @@ import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { useProperties } from "@/hooks/useProperties";
 import { deleteProperties } from "@/lib/api";
+import { toast } from "sonner";
 
 interface PropertyPopupProps {
   property: Properties;
@@ -26,10 +27,15 @@ const PropertyPopup: React.FC<PropertyPopupProps> = ({ property, onClose }) => {
   }
 
   const onDelete = async () => {
-    await deleteProperties(property?.id ?? 0);
-    mutate();
-    onClose()
-    router.refresh()
+    try {
+      await deleteProperties(property?.id ?? 0);
+
+      mutate();
+      onClose()
+      router.refresh()
+    } catch (err) {
+      toast.error('Something went wrong!')
+    }
   }
 
   return (
