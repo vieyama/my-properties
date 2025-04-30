@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { createProperties, updateProperties, uploadProperties } from '@/lib/api';
 import { useProperties } from '@/hooks/useProperties';
+import { toast } from 'sonner';
 
 interface PropertyFormProps {
   property?: Properties | null;
@@ -89,8 +90,11 @@ export default function PropertyForm({ property }: PropertyFormProps) {
       setFile(null)
       setIsSubmitting(false);
       mutate();
-    } finally {
       router.push('/dashboard');
+    } catch (error) {
+      toast.error('Something went wrong!')
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
